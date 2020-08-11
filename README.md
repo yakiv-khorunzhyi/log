@@ -1,17 +1,39 @@
 ## Installation
+
 Install the latest version with:
+
 ```
-$ composer require -
+$ composer require yakiv-khorunzhyi/log
 ```
 
 ## Examples
-Initialize object:
-```
-$logger = new \Y\Logger(__DIR__ . '/logs/log.log');
 
-//$logger->setPath(__DIR__ . '/logs/log.log');
+How to use for database?:
+
 ```
-Write logs to a file:
+// database
+$logger = new \Y\Logger();
+
+$logger->setStorage()->database(
+    new PDO('mysql:dbname=test;host=localhost', 'test', 'test'), 
+    'logs'    // table name
+);
+$logger->setFormatter()->database();
+
+$logger->log([
+    // db column => your value
+    'name' => 'Yakov',
+]);
 ```
-$logger->write($var);
+
+Write log to file:
+
 ```
+$logger->setStorage()->file(__DIR__ . '/logs/event.log');
+$logger->setFormatter()->string(';');
+
+$logger->log('Hello world');
+```
+
+## License
+MIT license.

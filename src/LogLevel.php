@@ -2,10 +2,6 @@
 
 namespace Y;
 
-/**
- * Class LogLevel
- * @package Y
- */
 class LogLevel
 {
     const INFO = 'info';

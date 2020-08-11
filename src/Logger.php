@@ -2,44 +2,48 @@
 
 namespace Y;
 
-/**
- * Class Log
- * @package Y
- */
+use Y\Enums\StorageType;
+use Y\Format\Formatters\DatabaseFormatter;
+use Y\Storage\Repositories\DatabaseRepository;
+
 class Logger extends AbstractLogger
 {
     /**
-     * @param $log
-     * @param string $level
-     * @param array $context
+     * @param mixed $log
+     *
+     * @return void
      */
-    public function write($log, string $level = LogLevel::ERROR, array $context = []): void
+    public function log($log)
     {
-        if (is_string($log)) {
-            $log = $this->interpolate($log, $context);
-        } else {
-            $log = $this->handleLog($log, $level);
-        }
+        $this->checkDataType($log);
 
-        $this->getInstance()->write($log, $level);
+        $data = $this->formatter->getFormatter()->format([
+            'level' => $this->level,
+            'created_at' => date('Y-m-d H:i:s'),
+            'data' => $log,
+        ]);
+
+        $this->storage->save($data);
     }
 
     /**
-     * @param string $message
-     * @param array $context
-     *
-     * @return string
+     * @param mixed $log
      */
-    protected function interpolate(string $message, array $context = [])
+    private function checkDataType($log)
     {
-        $replace = [];
+        $isDBRepository = $this->storage->getRepository() instanceof DatabaseRepository;
+        $isDBFormatter = $this->formatter->getFormatter() instanceof DatabaseFormatter;
 
-        foreach ($context as $key => &$val) {
-            if (!is_array($val) && (!is_object($val) || method_exists($val, '__toString'))) {
-                $replace['{' . $key . '}'] = $val;
-            }
+        if (($isDBRepository && !$isDBFormatter) || (!$isDBRepository && $isDBFormatter)) {
+            throw new \RuntimeException(
+                'Database storage is used together with database formatter.'
+            );
         }
 
-        return strtr($message, $replace);
+        if ($isDBRepository && !is_array($log)) {
+            throw new \RuntimeException(
+                'Database storage only accepts an associative array.'
+            );
+        }
     }
 }
