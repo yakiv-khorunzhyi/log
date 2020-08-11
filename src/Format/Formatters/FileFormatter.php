@@ -36,6 +36,14 @@ final class FileFormatter implements IFormatter
     {
         $str = '';
 
+        if (!is_string($data['data'])) {
+            $data['data'] = preg_replace(
+                '!\s+!',
+                ' ',
+                var_export($data['data'], true)
+            );
+        }
+
         foreach ($data as $key => &$val) {
             if (is_string($key)) {
                 $str .= "{$key}:{$val}{$this->elementSeparator}{$this->elementBreak}";

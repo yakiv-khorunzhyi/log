@@ -8,7 +8,7 @@ $ composer require yakiv-khorunzhyi/log
 
 ## Examples
 
-How to use for database?:
+How to use for database?
 
 ```
 // database
